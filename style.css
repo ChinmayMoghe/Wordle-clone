@@ -4,6 +4,11 @@
     padding:0;
 }
 
+:root {
+    --wordle-tries:6;
+    --wordle-word-length:5;
+}
+
 html {
     font-size: 62.5%; /*10px root size*/
 }
@@ -37,8 +42,8 @@ body {
 
 .wordle_grid {
     display:grid;
-    grid-template-columns: repeat(5,1fr);
-    grid-template-rows: repeat(6,1fr);
+    grid-template-columns: repeat(var(--wordle-word-length),1fr);
+    grid-template-rows: repeat(var(--wordle-tries),1fr);
     gap:5px;
 }
 
@@ -72,4 +77,5 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 }

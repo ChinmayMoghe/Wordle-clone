@@ -52,6 +52,10 @@ body {
     height: 50px;
     border:2px solid #ddd;
     border-radius: 5px;
+    display: flex;
+    align-items: center;
+    font-size: 2rem;
+    justify-content: center;
 }
 
 .keyboard {
@@ -78,4 +82,7 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    border-radius: 4px;
+    background-color: rgb(231, 225, 225);
+    color:#000;
 }

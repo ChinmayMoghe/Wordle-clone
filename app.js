@@ -10,9 +10,9 @@ class Wordle {
         this.keyBoardElement = document.querySelector('.keyboard');
         this.currentWord ='';
         this.currentLetterIndex = 0;
+        this.currentTry = 0;
         this.allWords = [];
         this.currentWordLetterCount = 0;
-        this.currentTry = 0;
         this.addKeyboardEventListener(); 
     }
 
@@ -65,6 +65,7 @@ class Wordle {
     }
 
     addLetterToCurrentWord(letter) {
+        if(this.currentWordLetterCount===this.wordLength) return;
         const letterElem = document.querySelector(`.letter:nth-of-type(${this.currentLetterIndex + 1})`);
         if(!letterElem) return;
         letterElem.textContent = letter;
@@ -91,6 +92,8 @@ class Wordle {
         if(!event.target.classList.contains('action-key')) {
             this.addLetterToCurrentWord(event.target.dataset.key);
         };
+        if(event.target.dataset.key === 'Enter') this.handleEnterKey();
+        if(event.target.dataset.key === 'Backspace') this.handleBackSpaceKey();
     }
 
 
@@ -105,7 +108,17 @@ class Wordle {
     
     handleEnterKey() {
         /*handle Enter key press*/
-        console.log('hit enter');
+        /*check the current length of word*/
+        /*if 5 letter word - increment currentLetterIndex, currentTry*/
+        if(this.currentTry === this.tries) return; 
+        this.currentTry += 1;
+        this.updateCurrentIdx();
+        console.log({start:this.wordStartIdx,end:this.wordEndIdx});
+    }
+
+    updateCurrentIdx() {
+        this.wordStartIdx = (this.wordLength*this.currentTry);
+        this.wordEndIdx = (this.wordLength*this.currentTry+this.wordLength - 1);
     }
 
     handleBackSpaceKey() {

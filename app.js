@@ -178,11 +178,6 @@ class Wordle {
     if (this.currentWord.length === this.wordLength) {
       const isvalidWord = this.checkWord();
       if (isvalidWord) {
-        console.info("Hit enter", {
-          currWord: this.currentWord,
-          try: this.currentTry,
-          total: this.tries,
-        });
         this.currentTry += 1;
         this.updateCurrentIdxRange();
         this.allWords.push(this.currentWord);

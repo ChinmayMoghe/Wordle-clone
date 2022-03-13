@@ -2,7 +2,7 @@
 
 A clone of popular word game called Wordle. This is for demo purpose only.
 
-## Live at : https://romantic-austin-9b05af.netlify.app/
+## Live at : <a href="https://romantic-austin-9b05af.netlify.app/" target="_blank">Wordle clone</a>
 
 ## SCREENSHOT
 

@@ -65,8 +65,22 @@ body {
   user-select: none;
 }
 
+@keyframes xVibrate {
+  from {
+    transform: translateX(-30%);
+  }
+  to {
+    transform: translateX(30%);
+  }
+}
+
 .wordle_grid .letter.wrong-letter {
   background-color: #888282;
+}
+
+.letter.no_word {
+  animation: 200ms cubic-bezier(0.85, 0.1, 0.25, 1.17) 2 alternate backwards
+    xVibrate;
 }
 
 .wordle_grid .letter.wrong-position {
@@ -108,6 +122,7 @@ body {
 }
 
 .toast {
+  min-width: 100px;
   padding: 5px 15px;
   border-radius: 5px;
   font-size: 20px;
@@ -122,4 +137,18 @@ body {
 
 .toast.visible {
   visibility: visible;
+}
+
+.play-again {
+  background-color: green;
+  color: #ddd;
+  border-radius: 4px;
+  border-color: transparent;
+  padding: 10px;
+  margin: 0 20px;
+  cursor: pointer;
+}
+
+.play-again:active {
+  transform: translateY(-2px);
 }

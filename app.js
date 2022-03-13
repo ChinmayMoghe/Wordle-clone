@@ -3,29 +3,29 @@ const DEFAULT_WORD_LENGTH = 5;
 const DEFAULT_TRY_COUNT = 6;
 import { WORD_LIST } from "./words.js";
 class Wordle {
-  constructor(
-    word = getRandomWord(WORD_LIST),
-    wordLength = DEFAULT_WORD_LENGTH,
-    tries = DEFAULT_TRY_COUNT
-  ) {
-    this.word = word;
+  constructor(wordLength = DEFAULT_WORD_LENGTH, tries = DEFAULT_TRY_COUNT) {
     this.wordLength = wordLength;
     this.tries = tries;
     this.gridElement = document.querySelector(".wordle_grid");
     this.keyBoardElement = document.querySelector(".keyboard");
-    this.currentWord = "";
-    this.currentLetterIdx = 0;
-    this.domLetterIdx = () => this.currentLetterIdx + 1;
-    this.currentTry = 0;
-    this.allWords = [];
+    this.initializeGameState();
     this.addKeyboardEventListener();
-    this.updateCurrentIdxRange();
   }
 
-  init = () => {
+  initializeGameState = () => {
+    this.gridElement.innerHTML = "";
+    this.keyBoardElement.innerHTML = "";
+    this.word = getRandomWord(WORD_LIST);
+    this.currentWord = "";
+    this.currentLetterIdx = 0;
+    this.currentTry = 0;
+    this.allWords = [];
+    this.updateCurrentIdxRange();
     this.createKeyboard();
     this.createWordleGrid();
   };
+
+  domLetterIdx = () => this.currentLetterIdx + 1;
 
   addKeyboardEventListener = () => {
     document.addEventListener("keydown", this.handleKeyPress);
@@ -126,14 +126,28 @@ class Wordle {
     }
   }
 
-  showToast = (message, seconds = 1) => {
+  showToast = (message, seconds = 1, showRestartBtn = false) => {
     const toastElem = document.querySelector(".toast");
     toastElem.textContent = message;
+    if (showRestartBtn) {
+      const btn = document.createElement("button");
+      btn.classList.add("play-again");
+      btn.textContent = "Play again";
+      btn.addEventListener("click", () => {
+        this.initializeGameState();
+        toastElem.classList.remove("visible");
+        toastElem.textContent = "";
+      });
+      toastElem.append(btn);
+    }
     toastElem.classList.add("visible");
-    setTimeout(() => {
-      toastElem.classList.remove("visible");
-      toastElem.textContent = "";
-    }, seconds * 1000);
+    return new Promise((res, rej) =>
+      setTimeout(() => {
+        toastElem.classList.remove("visible");
+        toastElem.textContent = "";
+        res();
+      }, seconds * 1000)
+    );
   };
 
   checkWord = () => {
@@ -163,6 +177,18 @@ class Wordle {
       }
       return true;
     } else {
+      for (let i = this.wordStartIdx; i <= this.wordEndIdx; i++) {
+        document
+          .querySelector(`.letter:nth-of-type(${i})`)
+          .classList.add("no_word");
+      }
+      setTimeout(() => {
+        for (let i = this.wordStartIdx; i <= this.wordEndIdx; i++) {
+          document
+            .querySelector(`.letter:nth-of-type(${i})`)
+            .classList.remove("no_word");
+        }
+      }, 400);
       this.showToast("This word is not in the list", 1.5);
       return false;
     }
@@ -172,9 +198,6 @@ class Wordle {
     /*handle Enter key press*/
     /*check the current length of word*/
     /*if 5 letter word - increment nextLetterIdx, currentTry*/
-    if (this.currentTry + 1 === this.tries) {
-      this.showToast(`Better luck next time,  word is : ${this.word}`, 3);
-    }
     if (this.currentWord.length === this.wordLength) {
       const isvalidWord = this.checkWord();
       if (isvalidWord) {
@@ -182,6 +205,12 @@ class Wordle {
         this.updateCurrentIdxRange();
         this.allWords.push(this.currentWord);
         this.currentWord = "";
+        if (this.currentTry === this.tries) {
+          this.showToast(
+            `Better luck next time,  word is : ${this.word}`,
+            3
+          ).then(() => this.showToast("Play again ?", 50, true));
+        }
       }
     }
   }
@@ -204,7 +233,6 @@ const getRandomWord = (arr) => {
 
 const initApp = () => {
   const wordle = new Wordle();
-  wordle.init();
 };
 
 document.addEventListener("DOMContentLoaded", initApp);

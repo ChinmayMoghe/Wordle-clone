@@ -1,20 +1,27 @@
 "use strict";
 const DEFAULT_WORD_LENGTH = 5;
-const DEFAULT_TRY_COUNT = 6; 
-
+const DEFAULT_TRY_COUNT = 6;
+import {WORD_LIST} from './words.js'; 
 class Wordle {
-    constructor(wordLength=DEFAULT_WORD_LENGTH,tries=DEFAULT_TRY_COUNT) {
+    constructor(word=getRandomWord(WORD_LIST),wordLength=DEFAULT_WORD_LENGTH,tries=DEFAULT_TRY_COUNT) {
+        this.word = word;
         this.wordLength = wordLength;
         this.tries = tries;
         this.gridElement = document.querySelector('.wordle_grid');
         this.keyBoardElement = document.querySelector('.keyboard');
         this.currentWord ='';
-        this.currentLetterIndex = 0;
+        this.currentLetterIdx= 0;
+        this.domLetterIdx = () => this.currentLetterIdx + 1;
         this.currentTry = 0;
         this.allWords = [];
-        this.currentWordLetterCount = 0;
-        this.addKeyboardEventListener(); 
+        this.addKeyboardEventListener();
+        this.updateCurrentIdxRange(); 
     }
+
+    init = () => {
+        this.createKeyboard();
+        this.createWordleGrid();
+    };
 
     addKeyboardEventListener = () => {
         document.addEventListener('keydown',this.handleKeyPress);
@@ -65,13 +72,13 @@ class Wordle {
     }
 
     addLetterToCurrentWord(letter) {
-        if(this.currentWordLetterCount===this.wordLength) return;
-        const letterElem = document.querySelector(`.letter:nth-of-type(${this.currentLetterIndex + 1})`);
+        if(this.currentLetterIdx < this.wordEndIdx) {
+        const letterElem = document.querySelector(`.letter:nth-of-type(${this.domLetterIdx()})`);
         if(!letterElem) return;
         letterElem.textContent = letter;
         this.currentWord+=letter;
-        this.currentLetterIndex++;
-        this.currentWordLetterCount++;
+        this.currentLetterIdx++;
+        }
     }
     
     handleKeyPress = (event) => {
@@ -98,27 +105,54 @@ class Wordle {
 
 
     removeLetterFromCurrentWord() {
-        const letterElem = document.querySelector(`.letter:nth-of-type(${this.currentLetterIndex})`);
+        if(this.currentLetterIdx>= this.wordStartIdx && this.currentLetterIdx<= this.wordEndIdx) {
+        const letterElem = document.querySelector(`.letter:nth-of-type(${this.currentLetterIdx})`);
         if(!letterElem) return;
         letterElem.textContent = null;
         this.currentWord = this.currentWord.slice(0,-1);
-        this.currentLetterIndex--;
-        this.currentWordLetterCount--;
+        this.currentLetterIdx--;
+        }
     }
+
+    checkWord = () => {
+        if(this.currentWord === this.word) {
+            for(let i=this.wordStartIdx;i<=this.wordEndIdx;i++) {
+                document.querySelector(`.letter:nth-of-type(${i})`).classList.add('right-position');
+            }
+        } else {
+        for(let idx=0; idx< this.currentWord.length;idx++) {
+            const letter = this.currentWord[idx];
+            const letterElem = document.querySelector(`.letter:nth-of-type(${this.wordStartIdx + idx})`);
+            if(this.word.includes(letter)) {
+                if(this.word.indexOf(letter)=== idx) {
+                    letterElem.classList.add('right-position');
+                } else {
+                    letterElem.classList.add('wrong-position');
+                }
+            } else {
+                letterElem.classList.add('wrong-letter');
+            }
+        }
+    }
+    };
     
     handleEnterKey() {
         /*handle Enter key press*/
         /*check the current length of word*/
-        /*if 5 letter word - increment currentLetterIndex, currentTry*/
-        if(this.currentTry === this.tries) return; 
-        this.currentTry += 1;
-        this.updateCurrentIdx();
-        console.log({start:this.wordStartIdx,end:this.wordEndIdx});
+        /*if 5 letter word - increment nextLetterIdx, currentTry*/
+        if(this.currentTry === this.tries) return;
+        if(this.currentWord.length === this.wordLength){
+            this.currentTry += 1;
+            this.checkWord();
+            this.updateCurrentIdxRange();
+            this.allWords.push(this.currentWord);
+            this.currentWord ='';
+        } 
     }
 
-    updateCurrentIdx() {
-        this.wordStartIdx = (this.wordLength*this.currentTry);
-        this.wordEndIdx = (this.wordLength*this.currentTry+this.wordLength - 1);
+    updateCurrentIdxRange() {
+        this.wordStartIdx = (this.wordLength*this.currentTry) + 1;
+        this.wordEndIdx = (this.wordLength*this.currentTry+this.wordLength - 1) + 1;
     }
 
     handleBackSpaceKey() {
@@ -127,10 +161,13 @@ class Wordle {
     }
 }
 
+const getRandomWord = (arr) => {
+    return arr[Math.ceil(Math.random()*(arr.length - 1))];
+};
+
 const initApp = () => {
     const wordle = new Wordle();
-    wordle.createWordleGrid();
-    wordle.createKeyboard();
+    wordle.init();
 }
 
 document.addEventListener("DOMContentLoaded",initApp);

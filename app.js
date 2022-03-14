@@ -20,6 +20,7 @@ class Wordle {
     this.currentLetterIdx = 0;
     this.currentTry = 0;
     this.allWords = [];
+    this.won = false;
     this.updateCurrentIdxRange();
     this.createKeyboard();
     this.createWordleGrid();
@@ -158,6 +159,10 @@ class Wordle {
             .querySelector(`.letter:nth-of-type(${i})`)
             .classList.add("right-position");
         }
+        this.won = true;
+        this.showToast("YOU WIN", 20).then(() =>
+          this.showToast("Play again ?", 50, true)
+        );
       } else {
         for (let idx = 0; idx < this.currentWord.length; idx++) {
           const letter = this.currentWord[idx];
@@ -205,7 +210,7 @@ class Wordle {
         this.updateCurrentIdxRange();
         this.allWords.push(this.currentWord);
         this.currentWord = "";
-        if (this.currentTry === this.tries) {
+        if (this.currentTry === this.tries && !this.won) {
           this.showToast(
             `Better luck next time,  word is : ${this.word}`,
             3
@@ -228,7 +233,7 @@ class Wordle {
 }
 
 const getRandomWord = (arr) => {
-  return arr[Math.ceil(Math.random() * (arr.length - 1))];
+  return arr[Math.ceil(Math.random() * Math.ceil((arr.length - 1) / 2))];
 };
 
 const initApp = () => {
